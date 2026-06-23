@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eat For 2 — Private Chef & 24/7 Food Vendor | Lagos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --flame:   #e84c1e;
+      --gold:    #f5a623;
+      --cream:   #fdf6ec;
+      --ink:     #1a0a00;
+      --smoke:   #3d1f0a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--ink); color: var(--cream); overflow-x: hidden; }
+
+    /* ── Canvas ── */
+    #hero-canvas { position: absolute; inset: 0; z-index: 0; }
+
+    /* ── Hero ── */
+    #hero {
+      position: relative; min-height: 100vh; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,76,30,.35) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      animation: pulse-glow 4s ease-in-out infinite; z-index: 0;
+    }
+    @keyframes pulse-glow { 0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)} }
+
+    .hero-content { position: relative; z-index: 2; text-align: center; padding: 0 1rem; }
+
+    .logo-ring {
+      width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--gold);
+      box-shadow: 0 0 40px rgba(245,166,35,.5), 0 0 80px rgba(232,76,30,.3);
+      margin: 0 auto 1.5rem;
+      animation: spin-slow 20s linear infinite;
+      overflow: hidden;
+    }
+    .logo-ring img { width: 100%; height: 100%; object-fit: cover; }
+    @keyframes spin-slow { from{box-shadow:0 0 40px rgba(245,166,35,.5),0 0 80px rgba(232,76,30,.3)} to{box-shadow:0 0 60px rgba(232,76,30,.7),0 0 100px rgba(245,166,35,.3)} }
+
+    h1 {
+      font-family: 'Playfair Display', serif; font-weight: 900;
+      font-size: clamp(3rem, 9vw, 7rem); line-height: 1;
+      background: linear-gradient(135deg, #fff 30%, var(--gold) 60%, var(--flame) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline { font-size: clamp(.9rem, 2.5vw, 1.2rem); color: rgba(253,246,236,.7); margin: 1rem 0 2rem; letter-spacing: .05em; }
+
+    /* Floating food emojis */
+    .float-emoji {
+      position: absolute; font-size: 2.5rem; animation: float-around linear infinite;
+      opacity: .7; pointer-events: none; z-index: 1;
+    }
+    @keyframes float-around {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: .7; }
+      90%  { opacity: .7; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ── Marquee ── */
+    .marquee-wrap { overflow: hidden; background: var(--flame); padding: .5rem 0; }
+    .marquee-inner { display: flex; gap: 3rem; animation: marquee 20s linear infinite; white-space: nowrap; }
+    .marquee-inner span { font-size: .95rem; font-weight: 600; letter-spacing: .1em; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── Sections ── */
+    section { padding: 5rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+    /* ── 3D Product Cards ── */
+    .card-scene { perspective: 1000px; }
+    .card-3d {
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: 20px; overflow: hidden; cursor: pointer;
+      transition: transform .5s cubic-bezier(.23,1,.32,1), box-shadow .5s;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .card-3d:hover {
+      transform: rotateY(-8deg) rotateX(4deg) scale(1.04);
+      box-shadow: 20px 20px 60px rgba(0,0,0,.5), -5px -5px 30px rgba(245,166,35,.15);
+    }
+    .card-3d img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .card-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--flame); color: #fff; font-size: .75rem; font-weight: 700;
+      padding: .25rem .6rem; border-radius: 99px; letter-spacing: .05em;
+    }
+    .card-body { padding: 1.25rem; }
+    .card-price { color: var(--gold); font-size: 1.4rem; font-weight: 700; font-family: 'Playfair Display', serif; }
+
+    /* ── CTA Button ── */
+    .btn-flame {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: linear-gradient(135deg, var(--flame), var(--gold));
+      color: #fff; font-weight: 700; padding: .9rem 2rem; border-radius: 99px;
+      border: none; cursor: pointer; font-size: 1rem; text-decoration: none;
+      box-shadow: 0 8px 30px rgba(232,76,30,.4);
+      transition: transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-flame::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.2), transparent);
+      opacity: 0; transition: opacity .2s;
+    }
+    .btn-flame:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(232,76,30,.6); }
+    .btn-flame:hover::after { opacity: 1; }
+
+    /* ── Features ── */
+    .feat-icon { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+    .feat-card {
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(245,166,35,.15); border-radius: 16px; padding: 2rem;
+      transition: transform .3s, border-color .3s;
+    }
+    .feat-card:hover { transform: translateY(-6px); border-color: rgba(245,166,35,.5); }
+
+    /* ── Testimonials ── */
+    .testi-card {
+      background: rgba(255,255,255,.05); border-left: 4px solid var(--flame);
+      border-radius: 0 12px 12px 0; padding: 1.5rem;
+    }
+    .stars { color: var(--gold); letter-spacing: .1em; }
+
+    /* ── WhatsApp Float ── */
+    .whatsapp-float {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999;
+      background: #25d366; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+      box-shadow: 0 4px 20px rgba(37,211,102,.5); text-decoration: none;
+      animation: bounce-wa 2s ease-in-out infinite;
+    }
+    @keyframes bounce-wa { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+    /* ── Scroll reveal ── */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+      transition: background .3s, backdrop-filter .3s;
+    }
+    nav.scrolled { background: rgba(26,10,0,.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(245,166,35,.15); }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--gold); }
+
+    /* ── Footer ── */
+    footer { background: rgba(0,0,0,.5); border-top: 1px solid rgba(245,166,35,.15); padding: 3rem 1.5rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <span class="nav-logo">Eat For 2</span>
+  <div style="display:flex;gap:1rem;align-items:center">
+    <a href="#menu-section" class="text-sm" style="color:rgba(253,246,236,.7);text-decoration:none">Menu</a>
+    <a href="#about" class="text-sm" style="color:rgba(253,246,236,.7);text-decoration:none">About</a>
+    <a href="/menu" class="btn-flame" style="padding:.6rem 1.4rem;font-size:.9rem">Order Now 🔥</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="max-width:100%;padding:0">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-glow"></div>
+
+  <!-- Floating emojis -->
+  <span class="float-emoji" style="left:10%;animation-duration:12s;animation-delay:0s">🍗</span>
+  <span class="float-emoji" style="left:25%;animation-duration:9s;animation-delay:2s">🌶️</span>
+  <span class="float-emoji" style="left:45%;animation-duration:14s;animation-delay:1s">🍚</span>
+  <span class="float-emoji" style="left:65%;animation-duration:11s;animation-delay:3s">🐟</span>
+  <span class="float-emoji" style="left:80%;animation-duration:10s;animation-delay:.5s">🌿</span>
+  <span class="float-emoji" style="left:90%;animation-duration:13s;animation-delay:4s">🔥</span>
+
+  <div class="hero-content">
+    <div class="logo-ring">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80" alt="Food" />
+    </div>
+    <h1>Eat For 2</h1>
+    <p class="tagline">Private Chef · 24/7 Delivery · Lagos, Sangotedo</p>
+    <p style="color:rgba(253,246,236,.5);font-size:.9rem;margin-bottom:2rem">Real Nigerian flavour. Made with love. Delivered to your door.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="/menu" class="btn-flame">🍽️ View Our Menu</a>
+      <a href="https://wa.me/2348139595504" target="_blank" class="btn-flame" style="background:linear-gradient(135deg,#128c7e,#25d366)">💬 WhatsApp Us</a>
+    </div>
+    <div style="margin-top:3rem;display:flex;gap:3rem;justify-content:center;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:900">24/7</div>
+        <div style="font-size:.8rem;color:rgba(253,246,236,.5)">Always Open</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:900">2.3K</div>
+        <div style="font-size:.8rem;color:rgba(253,246,236,.5)">Happy Likes</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:900">193</div>
+        <div style="font-size:.8rem;color:rgba(253,246,236,.5)">Followers</div>
+      </div>
+    </div>
+  </div>
+  <!-- Scroll indicator -->
+  <div style="position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;animation:bounce-wa 2s infinite">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(245,166,35,.6)" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    {% for item in menu %}
+    <span>{{ item.emoji }} {{ item.name }}</span>
+    {% endfor %}
+    {% for item in menu %}
+    <span>{{ item.emoji }} {{ item.name }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="about">
+  <div class="reveal" style="text-align:center;margin-bottom:3rem">
+    <p style="color:var(--flame);font-size:.85rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase">Why Choose Us</p>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);color:var(--cream);margin-top:.5rem">Cooked with Soul</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem">
+    <div class="feat-card reveal">
+      <span class="feat-icon">🕐</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:.5rem">24/7 Service</h3>
+      <p style="color:rgba(253,246,236,.6);font-size:.9rem;line-height:1.7">Hungry at midnight? We've got you. Order any time, day or night, and we'll deliver.</p>
+    </div>
+    <div class="feat-card reveal" style="transition-delay:.1s">
+      <span class="feat-icon">👩‍🍳</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:.5rem">Private Chef</h3>
+      <p style="color:rgba(253,246,236,.6);font-size:.9rem;line-height:1.7">Want a customised menu for your event? Our private chef service is built for you.</p>
+    </div>
+    <div class="feat-card reveal" style="transition-delay:.2s">
+      <span class="feat-icon">🌶️</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:.5rem">Authentic Flavours</h3>
+      <p style="color:rgba(253,246,236,.6);font-size:.9rem;line-height:1.7">Every dish is made from scratch with fresh ingredients and real Nigerian spices.</p>
+    </div>
+    <div class="feat-card reveal" style="transition-delay:.3s">
+      <span class="feat-icon">📦</span>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:.5rem">Neat Packaging</h3>
+      <p style="color:rgba(253,246,236,.6);font-size:.9rem;line-height:1.7">Every order is packed neatly in our branded boxes — presentable and Instagram-worthy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MENU PREVIEW -->
+<section id="menu-section" style="max-width:1200px;margin:0 auto;padding:5rem 1.5rem">
+  <div class="reveal" style="text-align:center;margin-bottom:3rem">
+    <p style="color:var(--flame);font-size:.85rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase">Today's Selection</p>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.5rem);color:var(--cream);margin-top:.5rem">Our Signature Dishes</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem">
+    {% for item in menu %}
+    <div class="card-scene reveal" style="transition-delay:{{ loop.index0 * 0.1 }}s">
+      <div class="card-3d" onclick="window.location='/checkout?item_id={{ item.id }}'">
+        <img src="{{ item.image }}" alt="{{ item.name }}" loading="lazy" />
+        <span class="card-badge">{{ item.category }}</span>
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+            <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--cream)">{{ item.name }}</h3>
+            <span class="card-price">₦{{ "{:,}".format(item.price) }}</span>
+          </div>
+          <p style="color:rgba(253,246,236,.55);font-size:.85rem;line-height:1.6;margin-bottom:1rem">{{ item.description }}</p>
+          <a href="/checkout?item_id={{ item.id }}" class="btn-flame" style="width:100%;justify-content:center;display:flex;font-size:.9rem">
+            Order Now 🛒
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="text-align:center;margin-top:3rem">
+    <a href="/menu" class="btn-flame">See Full Menu →</a>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="background:rgba(255,255,255,.03);border-top:1px solid rgba(245,166,35,.1);border-bottom:1px solid rgba(245,166,35,.1);padding:5rem 1.5rem">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem">
+      <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3rem);color:var(--cream)">What Customers Say</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem">
+      <div class="testi-card reveal">
+        <div class="stars">★★★★★</div>
+        <p style="color:rgba(253,246,236,.75);margin:.75rem 0;line-height:1.7;font-style:italic">"The jollof rice is insane 🔥 I ordered at 11pm and it was still delivered fresh and hot. I'm never ordering from anywhere else!"</p>
+        <p style="color:var(--gold);font-weight:600;font-size:.9rem">— Adaeze O., Lekki</p>
+      </div>
+      <div class="testi-card reveal" style="transition-delay:.1s">
+        <div class="stars">★★★★★</div>
+        <p style="color:rgba(253,246,236,.75);margin:.75rem 0;line-height:1.7;font-style:italic">"Best pepper chicken in Lagos, no cap. The packaging is so clean too. Worth every naira. Already placed 3 orders this week 😂"</p>
+        <p style="color:var(--gold);font-weight:600;font-size:.9rem">— Kola A., Ajah</p>
+      </div>
+      <div class="testi-card reveal" style="transition-delay:.2s">
+        <div class="stars">★★★★★</div>
+        <p style="color:rgba(253,246,236,.75);margin:.75rem 0;line-height:1.7;font-style:italic">"Hired them for my birthday and the private chef service was 10/10. Every guest was asking for the chef's number. Highly recommended!"</p>
+        <p style="color:var(--gold);font-weight:600;font-size:.9rem">— Blessing N., VGC</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section style="text-align:center;padding:6rem 1.5rem">
+  <div class="reveal">
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,4rem);color:var(--cream);margin-bottom:1rem">Ready to <span style="color:var(--flame)">Eat?</span></h2>
+    <p style="color:rgba(253,246,236,.55);margin-bottom:2rem;font-size:1.1rem">Order online in 2 minutes. Fresh food on its way to you.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="/menu" class="btn-flame" style="font-size:1.1rem;padding:1rem 2.5rem">🍽️ Order Now</a>
+      <a href="https://wa.me/2348139595504" target="_blank" class="btn-flame" style="background:linear-gradient(135deg,#128c7e,#25d366);font-size:1.1rem;padding:1rem 2.5rem">📞 08139595504</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:.5rem">Eat For 2</p>
+  <p style="color:rgba(253,246,236,.4);font-size:.85rem">Lagos, Sangotedo · 24/7 · @eat_for_2</p>
+  <p style="color:rgba(253,246,236,.25);font-size:.75rem;margin-top:1rem">© 2025 Eat For 2. All rights reserved.</p>
+</footer>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/2348139595504" target="_blank" class="whatsapp-float" title="Chat on WhatsApp">💬</a>
+
+<script>
+// ── Three.js Hero Canvas ──────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 5);
+
+  // Lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+  const pointLight1 = new THREE.PointLight(0xe84c1e, 3, 20);
+  pointLight1.position.set(3, 3, 3);
+  scene.add(pointLight1);
+  const pointLight2 = new THREE.PointLight(0xf5a623, 2, 20);
+  pointLight2.position.set(-3, -2, 2);
+  scene.add(pointLight2);
+
+  // Floating spheres / food-like orbs
+  const orbs = [];
+  const orbGeo = new THREE.SphereGeometry(1, 32, 32);
+  const colors = [0xe84c1e, 0xf5a623, 0xc0392b, 0xf39c12, 0xe67e22];
+  for (let i = 0; i < 8; i++) {
+    const mat = new THREE.MeshPhongMaterial({
+      color: colors[i % colors.length],
+      transparent: true, opacity: 0.15,
+      wireframe: i % 2 === 0,
+      shininess: 100,
+    });
+    const mesh = new THREE.Mesh(orbGeo, mat);
+    const r = 2 + Math.random() * 2;
+    const theta = (i / 8) * Math.PI * 2;
+    mesh.position.set(Math.cos(theta) * r, (Math.random() - .5) * 3, Math.sin(theta) * r - 2);
+    mesh.scale.setScalar(.3 + Math.random() * .5);
+    orbs.push({ mesh, speed: .003 + Math.random() * .004, offset: Math.random() * Math.PI * 2 });
+    scene.add(mesh);
+  }
+
+  // Particle field
+  const particleCount = 200;
+  const positions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount * 3; i++) positions[i] = (Math.random() - .5) * 20;
+  const particleGeo = new THREE.BufferGeometry();
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const particleMat = new THREE.PointsMaterial({ color: 0xf5a623, size: .05, transparent: true, opacity: .6 });
+  scene.add(new THREE.Points(particleGeo, particleMat));
+
+  // Mouse parallax
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth - .5) * 2;
+    mouseY = -(e.clientY / window.innerHeight - .5) * 2;
+  });
+
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += 0.01;
+    orbs.forEach(o => {
+      o.mesh.rotation.x += o.speed;
+      o.mesh.rotation.y += o.speed * .7;
+      o.mesh.position.y += Math.sin(t + o.offset) * .003;
+    });
+    pointLight1.position.x = Math.sin(t) * 4;
+    pointLight1.position.y = Math.cos(t * .7) * 3;
+    pointLight2.position.x = Math.cos(t * 1.3) * 4;
+    camera.position.x += (mouseX * .5 - camera.position.x) * .05;
+    camera.position.y += (mouseY * .3 - camera.position.y) * .05;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+// ── Navbar scroll ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── 3D card mouse tilt ────────────────────────────────────────────────────────
+document.querySelectorAll('.card-3d').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - .5;
+    const y = (e.clientY - rect.top)  / rect.height - .5;
+    card.style.transform = `rotateY(${x * 20}deg) rotateX(${-y * 20}deg) scale(1.04)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: eat-for-2
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_DEBUG
+        value: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: SELLER_EMAIL
+        sync: false
+      - key: BREVO_SMTP_LOGIN
+        sync: false
+      - key: BREVO_SMTP_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        value: Eat For 2 Orders
+      - key: BASE_URL
+        sync: false

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — Eat For 2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --flame:#e84c1e; --gold:#f5a623; --cream:#fdf6ec; --ink:#1a0a00; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:var(--ink); color:var(--cream); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+    .card { background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02)); border:1px solid rgba(245,166,35,.2); border-radius:24px; padding:3rem 2rem; text-align:center; max-width:480px; width:100%; }
+    @keyframes pop { 0%{transform:scale(0)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    .icon { font-size:5rem; display:block; animation:pop .5s cubic-bezier(.23,1,.32,1) forwards; }
+    .btn { display:inline-flex; align-items:center; gap:.5rem; background:linear-gradient(135deg,var(--flame),var(--gold)); color:#fff; font-weight:700; padding:.85rem 2rem; border-radius:99px; text-decoration:none; font-size:.95rem; box-shadow:0 6px 24px rgba(232,76,30,.4); transition:transform .2s; }
+    .btn:hover { transform:translateY(-2px); }
+    .detail-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid rgba(245,166,35,.1); font-size:.9rem; }
+  </style>
+</head>
+<body>
+<div class="card">
+  {% if not failed %}
+  <span class="icon">🎉</span>
+  <h1 style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--cream);margin:1rem 0 .5rem">Order Confirmed!</h1>
+  <p style="color:rgba(253,246,236,.5);margin-bottom:2rem">Your order has been received. We'll start preparing it right away!</p>
+
+  <div style="background:rgba(255,255,255,.04);border-radius:14px;padding:1.25rem;margin-bottom:2rem;text-align:left">
+    {% if meta %}
+    <div class="detail-row"><span style="color:rgba(253,246,236,.5)">Name</span><span>{{ meta.get('customer_name','—') }}</span></div>
+    <div class="detail-row"><span style="color:rgba(253,246,236,.5)">Item</span><span>{{ meta.get('item_name','—') }}</span></div>
+    <div class="detail-row"><span style="color:rgba(253,246,236,.5)">Qty</span><span>{{ meta.get('quantity','1') }}</span></div>
+    <div class="detail-row"><span style="color:rgba(253,246,236,.5)">Address</span><span style="max-width:60%;text-align:right">{{ meta.get('address','—') }}</span></div>
+    {% endif %}
+    <div class="detail-row" style="border-bottom:none"><span style="color:rgba(253,246,236,.5)">Amount Paid</span><span style="color:var(--gold);font-weight:700">₦{{ "{:,}".format(amount) }}</span></div>
+  </div>
+
+  <p style="color:rgba(253,246,236,.35);font-size:.8rem;margin-bottom:2rem">Reference: {{ reference }}</p>
+
+  {% else %}
+  <span class="icon">😕</span>
+  <h1 style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--cream);margin:1rem 0 .5rem">Payment Unsuccessful</h1>
+  <p style="color:rgba(253,246,236,.5);margin-bottom:2rem">Something went wrong with your payment. Please try again or contact us.</p>
+  {% endif %}
+
+  <div style="display:flex;flex-direction:column;gap:.75rem">
+    <a href="/menu" class="btn">🍽️ Order Again</a>
+    <a href="https://wa.me/2348139595504" target="_blank" class="btn" style="background:linear-gradient(135deg,#128c7e,#25d366)">💬 Chat with us on WhatsApp</a>
+  </div>
+</div>
+</body>
+</html>
