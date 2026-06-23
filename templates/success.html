@@ -16,6 +16,14 @@
     .btn { display:inline-flex; align-items:center; gap:.5rem; background:linear-gradient(135deg,var(--flame),var(--gold)); color:#fff; font-weight:700; padding:.85rem 2rem; border-radius:99px; text-decoration:none; font-size:.95rem; box-shadow:0 6px 24px rgba(232,76,30,.4); transition:transform .2s; }
     .btn:hover { transform:translateY(-2px); }
     .detail-row { display:flex; justify-content:space-between; padding:.6rem 0; border-bottom:1px solid rgba(245,166,35,.1); font-size:.9rem; }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .card { padding: 2rem 1.25rem; border-radius: 18px; }
+      .icon { font-size: 3.8rem; }
+      .detail-row { font-size: .85rem; }
+      .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>

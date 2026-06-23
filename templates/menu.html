@@ -41,6 +41,19 @@
 
     .reveal { opacity:0; transform:translateY(30px); transition:opacity .6s ease,transform .6s ease; }
     .reveal.visible { opacity:1; transform:none; }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      nav { padding: .85rem 1rem; }
+      nav a[href="/"] { font-size: 1.15rem; }
+      div[style*="padding-top:5rem"] { padding-top: 4.5rem !important; padding-bottom: 2rem !important; }
+      div[style*="padding:1rem 1.5rem;margin-bottom:2rem"] { gap: .5rem !important; padding: .75rem 1rem !important; }
+      .filter-btn { padding: .45rem 1rem; font-size: .82rem; }
+      #menu-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; padding: 0 1rem 3rem !important; }
+      .card-3d:hover { transform: none; box-shadow: none; }
+      .card-3d img { height: 180px; }
+      .whatsapp-float { width: 50px; height: 50px; font-size: 1.5rem; bottom: 1rem; right: 1rem; }
+    }
   </style>
 </head>
 <body>

@@ -48,6 +48,17 @@
       display:flex; align-items:center; justify-content:center; transition:background .2s;
     }
     .qty-btn:hover { background:var(--flame); border-color:var(--flame); }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      body { padding: 4.5rem .85rem 2rem; }
+      .form-card { padding: 1.5rem 1.25rem; border-radius: 18px; }
+      .item-preview { gap: .75rem; padding: .75rem; }
+      .item-preview img { width: 64px; height: 64px; }
+      div[style*="align-items:center;gap:1rem;margin-top:.4rem"] { flex-wrap: wrap; gap: .6rem !important; }
+      #total-price { margin-left: 0 !important; width: 100%; text-align: right; }
+      .form-input, textarea.form-input { font-size: 1rem; } /* avoid iOS zoom-on-focus */
+    }
   </style>
 </head>
 <body>
